@@ -1,0 +1,105 @@
+db.restaurants.drop();
+
+db.restaurants.insertMany([
+  {
+    restaurant_id: "RST001",
+    name: "Spice Garden",
+    cuisine: "Indian",
+    address: { street: "12 Curry Ln", zipcode: "10001", town: "Newtown" },
+    grades: [ { score: 8 }, { score: 12 } ]
+  },
+  {
+    restaurant_id: "RST002",
+    name: "Ocean Bistro",
+    cuisine: "Seafood",
+    address: { street: "3 Harbor Rd", zipcode: "10112", town: "Harborview" },
+    grades: [ { score: 15 }, { score: 9 } ]
+  },
+  {
+    restaurant_id: "RST003",
+    name: "Pasta Palace",
+    cuisine: "Italian",
+    address: { street: "88 Noodle St", zipcode: "20005", "town": "Little Italy" },
+    grades: [ { score: 11 }, { score: 14 } ]
+  },
+  {
+    restaurant_id: "RST004",
+    name: "Sushi World",
+    cuisine: "Japanese",
+    address: { street: "55 Ocean Ave", zipcode: "10023", town: "Seaside" },
+    grades: [ { score: 7 }, { score: 6 } ]
+  },
+  {
+    restaurant_id: "RST005",
+    name: "Taco Town",
+    cuisine: "Mexican",
+    address: { street: "7 Fiesta Blvd", zipcode: "11002", town: "Sunset" },
+    grades: [ { score: 13 }, { score: 10 } ]
+  },
+  {
+    restaurant_id: "RST006",
+    name: "Burger Hub",
+    cuisine: "American",
+    address: { street: "1 Grill St", zipcode: "10100", town: "Downtown" },
+    grades: [ { score: 18 }, { score: 20 } ]
+  },
+  {
+    restaurant_id: "RST007",
+    name: "Green Vegan",
+    cuisine: "Vegan",
+    address: { street: "42 Leaf Rd", zipcode: "10045", town: "Greens" },
+    grades: [ { score: 5 }, { score: 6 } ]
+  },
+  {
+    restaurant_id: "RST008",
+    name: "Baker's Dozen",
+    cuisine: "Bakery",
+    address: { street: "9 Crust Ave", zipcode: "12000", town: "Bakerville" },
+    grades: [ { score: 4 }, { score: 3 } ]
+  },
+  {
+    restaurant_id: "RST009",
+    name: "Curry House",
+    cuisine: "Indian",
+    address: { street: "17 Spice Rd", zipcode: "10099", town: "Oldtown" },
+    grades: [ { score: 10 }, { score: 9 } ]
+  },
+  {
+    restaurant_id: "RST010",
+    name: "Pho Corner",
+    cuisine: "Vietnamese",
+    address: { street: "21 Broth St", zipcode: "13010", town: "Eastside" },
+    grades: [ { score: 14 }, { score: 16 } ]
+  }
+]);
+
+
+db.restaurants.find().pretty();
+db.restaurants.find().sort({ name: -1 }).pretty();
+db.restaurants.find(
+  { "grades.score": { $lte: 10 } },
+  { _id: 0, restaurant_id: 1, name: 1, cuisine: 1, "address.town": 1 }
+).pretty();
+
+db.restaurants.aggregate([
+  { $unwind: "$grades" },
+  {
+    $group: {
+      _id: "$restaurant_id",
+      name: { $first: "$name" },
+      avgScore: { $avg: "$grades.score" }
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      restaurant_id: "$_id",
+      name: 1,
+      avgScore: { $round: ["$avgScore", 2] }
+    }
+  }
+]);
+db.restaurants.find(
+  { "address.zipcode": /^10/ },
+  { _id: 0, name: 1, address: 1 }
+).pretty();
